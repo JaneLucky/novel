@@ -12,6 +12,8 @@ const bookRouter=require("./routes/books.js");
 const uploadRouter=require("./routes/upload");
 //引入post请求的模块
 const bodyParser=require("body-parser");
+//引入session模块
+const session=require("express-session");
 
 //创建服务器
 var app=express();
@@ -33,6 +35,14 @@ app.use(cors({
     // axios默认是不带钥匙的，这里设置axios必须携带钥匙
     credentials:true  //提高安全级别，每次访问都进行验证，是不是Vue脚手架的axios的请求
 }));
+
+//设置服务器端的session配置
+app.use(session({
+         secret:'Jane',//加密的字符串，里面内容可以随便写
+        resave:true,  //每次请求是否更新session数据
+         saveUninitialized:true //强制将未初始化的session存储，默认为true
+}));
+
 
 
 //挂载用户路由

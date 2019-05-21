@@ -49,8 +49,11 @@
     </div>
 </template>
 <script>
+import { Toast } from 'mint-ui'
 import Footer from "../components/Footer"
 import Header from "../components/Header"
+
+
 export default {
     name:"MyBook",
     data(){
@@ -77,6 +80,34 @@ export default {
                 }
                 // console.table(this.list);
             });
+        },
+        //判断是否已经登录
+        checkLogin(){
+            this.axios("http://127.0.0.1:3000/user/checkLogin").then((result)=>{
+                //没有登录，就提示先去登录，跳转到登录页面
+                if(result.data.code==201){
+                    Toast({
+                        message: '请先去登录',
+                        duration: 2000
+                    });
+                    setTimeout(()=>{
+                        this.$router.push("/login");
+                    },2000);
+                    
+                }else{//否则，显示书架信息
+                    var allList=JSON.parse(localStorage.list);
+                    // console.table(allList);
+                    var i=0;
+                    var queryList=[];
+                    for (var i=0;i<allList.length;i++) {
+                        queryList.push(parseInt(allList[i].bid));
+                    }
+                    // console.log(queryList);
+                    this.queryList=queryList.reverse();
+                    // console.log(this.queryList);
+                    this.loadList();
+                }
+            })
         }
     },
     components:{
@@ -84,17 +115,7 @@ export default {
         Header
     },
     created(){
-        var allList=JSON.parse(localStorage.list);
-        // console.table(allList);
-        var i=0;
-        var queryList=[];
-        for (var i=0;i<allList.length;i++) {
-            queryList.push(parseInt(allList[i].bid));
-        }
-        // console.log(queryList);
-        this.queryList=queryList.reverse();
-        // console.log(this.queryList);
-        this.loadList();
+        this.checkLogin();
     }
 }
 </script>

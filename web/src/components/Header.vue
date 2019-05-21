@@ -2,7 +2,7 @@
     <div>
         <mt-header fixed title="书城" style="background:#fff;color:#333;font-size:1rem; border-bottom:1px solid #e6e6e6;">
             <router-link to="/" slot="left">
-                <mt-button>
+                <mt-button @click="goBack">
                     <img src="http://127.0.0.1:3000/back.png" alt="" style="height:50%; vertical-align: middle;">
                 </mt-button>
             </router-link>
@@ -18,6 +18,9 @@ export default {
     methods:{
         goHome(){
             this.$router.push("/");
+        },
+        goBack(){
+            this.$router.go(-1);
         }
     }
 }

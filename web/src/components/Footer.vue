@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+
         <nav class="mui-bar mui-bar-tab">
 			<router-link to="/myBook" :class="barNo==1?'mui-tab-item active':'mui-tab-item '" @click="changeBarNo(1)">
 				<span class="mui-icon back" style=""></span>
@@ -19,7 +19,7 @@
 				<span class="mui-tab-label">我的</span>
 			</router-link>
 		</nav>
-    </div>
+
 </template>
 <script>
 export default {

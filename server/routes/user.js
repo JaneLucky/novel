@@ -19,6 +19,8 @@ router.get("/login",function(req,res){
         if(result.length==0){
             res.send({code:201,msg:"用户名或者密码错误"});
         }else{
+            req.session.uid=result[0].uid;
+            console.log(req.session.uid);
             res.send({code:200,msg:result});
         }
 
@@ -59,6 +61,26 @@ router.post("/register",function(req,res){
         }
     })
 });
+//判断用户是否已经登录
+router.get("/checkLogin",function(req,res){
+    var uid=req.session.uid;
+    console.log(uid);
+    pool.query("select uid from vue_user where uid=?",[uid],function(err,result){
+        if(err){ throw err}
+        if(result.length==0){
+            res.send({code:201,msg:"请先去登录"});
+        }else{
+            res.send({code:200,msg:"已经登录了"});
+        }
+
+    })
+
+});
+//退出登录
+router.get("/loginOut",function(req,res){
+    req.session.destroy();
+    res.send({code:200,msg:"销毁session"});
+})
 
 
 module.exports=router;

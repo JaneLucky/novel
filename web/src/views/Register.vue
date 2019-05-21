@@ -66,6 +66,21 @@ export default {
                 this.checkImg="http://127.0.0.1:3000/checkBtn.png";
             }
         },
+        //设置cookie
+        setCookies(name,value,expiredays){
+            document.cookie=name+"="+value+";max-age="+expiredays;
+            console.log(document.cookie);
+        },
+        //获得cookie
+        getCookies(){
+            var arr1=document.cookie.split(";");
+            var obj={};
+            for(var i=0;i<arr1.length;i++){
+                var arr2=arr1[i].trim().split("=");
+                obj[arr2[0]]=arr2[1];
+            }
+            return obj;
+        },
         submit(){
             var regexp=/^\w{3,8}$/;
             if(!regexp.test(this.username)){
@@ -91,6 +106,9 @@ export default {
                     console.log(result.data);
                     if(result.data.code==200){
                         // Toast("");
+                        this.setCookies("uname",this.username,7*60*60*24);
+                        this.setCookies("upwd",'',-1);
+                        this.setCookies("isrememberPwd",'',-1);
                         Toast({
                             message: '注册成功',
                             duration: 1000

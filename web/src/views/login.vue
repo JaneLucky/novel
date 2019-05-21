@@ -1,53 +1,70 @@
 <template>
     <div class="container">
         <Header></Header>
-        <div class="title">
-            <p :class="`${account==true?'active':''}`" @click="toggle">账号登录</p>
-            <p :class="`${account==false?'active':''}`" @click="toggle">手机验证码</p>
-        </div>
-        <div class="main" v-show="account">
-            <div class="myForm">
-                <div>
-                    <label for="uname">账号</label>
-                    <input id="uname" name="uname" type="text" placeholder="请输入用户名" v-model="username">
-                </div>
-                <div>
-                    <label for="upwd">密码</label>
-                    <input id="upwd" name="upwd" type="password" placeholder="请输入密码" v-model="password">
-                </div>
+        <div class="toLogin" v-show="!iflogin">
+            <div class="title">
+    
+                <p :class="`${account==true?'active':''}`" @click="toggle">账号登录</p>
+                <p :class="`${account==false?'active':''}`" @click="toggle">手机验证码</p>
             </div>
-        </div>
-        <div class="main" v-show="!account">
-            <div class="myForm">
-                <div>
-                    <label for="phone">手机号</label>
-                    <input id="phone" name="phone" type="text" placeholder="请输入手机号" v-model="username">
-                </div>
-                <div>
-                    <label for="checkNo1">校验码</label>
-                    <input id="checkNo1" name="checkNo1" type="text" v-model="password">
-                </div>
-                <div>
-                    <label for="checkNo2">验证码</label>
-                    <input id="checkNo2" name="checkNo2" type="text" v-model="password">
-                </div>
-            </div>
-        </div>
-        <div class="main">
-            <div class="myForm">
-                <div id="serve">
+            <div class="main" v-show="account">
+                <div class="myForm">
                     <div>
-                        <img :src="checkImg" alt="" @click="agreeServe">&nbsp;&nbsp;&nbsp;&nbsp;同意<span>《用户服务协议》</span>和<span>《隐私服务协议》</span>
+                        <label for="uname">账号</label>
+                        <input id="uname" name="uname" type="text" placeholder="请输入用户名" v-model="username">
+                    </div>
+                    <div>
+                        <label for="upwd">密码</label>
+                        <input id="upwd" name="upwd" type="password" placeholder="请输入密码" v-model="password">
+                    </div>
+                    <div id="remember">
+                        <img :src="checkImgPwd" alt="" @click="rememberPwd">&nbsp;&nbsp;&nbsp;&nbsp;<label for="remember">记住密码</label>
                     </div>
                 </div>
-                <div>
-                    <input id="submit" type="submit" value="登录" @click="submit" :class="ifAgree?'canSubmit':'canNotSubmit'">
+            </div>
+            <div class="main" v-show="!account">
+                <div class="myForm">
+                    <div>
+                        <label for="phone">手机号</label>
+                        <input id="phone" name="phone" type="text" placeholder="请输入手机号" v-model="phone">
+                    </div>
+                    <div>
+                        <label for="checkNo1">校验码</label>
+                        <input id="checkNo1" name="checkNo1" type="text" v-model="pwd">
+                    </div>
+                    <div>
+                        <label for="checkNo2">验证码</label>
+                        <input id="checkNo2" name="checkNo2" type="text" v-model="valiNum">
+                    </div>
                 </div>
             </div>
+            <div class="main">
+                <div class="myForm">
+                    <div id="serve">
+                        <div>
+                            <img :src="checkImg" alt="" @click="agreeServe">&nbsp;&nbsp;&nbsp;&nbsp;同意<span>《用户服务协议》</span>和<span>《隐私服务协议》</span>
+                        </div>
+                    </div>
+                    <div>
+                        <input id="submit" type="submit" value="登录" @click="submit" :class="ifAgree?'canSubmit':'canNotSubmit'">
+                    </div>
+                </div>
+            </div>
+            <div class="otherLink clearFlexd">
+                <div class="left">忘记密码？</div>
+                <div class="right"><router-link to="/register">注册</router-link></div>
+            </div>
         </div>
-        <div class="otherLink clearFlexd">
-            <div class="left">忘记密码？</div>
-            <div class="right"><router-link to="/register">注册</router-link></div>
+        <div class="logined" v-show="iflogin">
+            <div>
+                 <div style="padding:3rem 0 1rem;">
+                     <img src="../assets/me.png" alt="" style="display:block;margin:0 auto;width:30%;">
+                 </div>
+                <p style="text-align:center;font-size:1.4rem; font-weight:600;">
+                    欢迎<span style="color:#4cb3b2">{{username}}</span>登录
+                </p>
+                <button @click="loginOut" class="loginOut">退出登录</button>
+            </div>
         </div>
     </div>
 </template>
@@ -59,11 +76,17 @@ export default {
     name:"Login",
     data(){
         return {
+            iflogin:false,
             username:"",
             password:"",
+            phone:"",
+            pwd:"",
+            valiNum:"",
             account:true,
             ifAgree:false,
-            checkImg:"http://127.0.0.1:3000/checkBtn.png"
+            checkImg:"http://127.0.0.1:3000/checkBtn.png",
+            checkImgPwd:"http://127.0.0.1:3000/checkBtn.png",
+            isrememberPwd:false
         }
     },
     methods:{
@@ -97,6 +120,18 @@ export default {
                 }).then((result)=>{
                     console.log(result.data);
                     if(result.data.code==200){
+                        if(this.isrememberPwd){
+                            this.setCookies("uname",this.username,7*60*60*24);
+                            this.setCookies("upwd",this.password,7*60*60*24);
+                            this.setCookies("isrememberPwd",this.isrememberPwd,7*60*60*24);
+                        }else{
+                            this.setCookies("uname",'',-1);
+                            this.setCookies("upwd",'',-1);
+                            this.setCookies("isrememberPwd",'',-1);
+                        }
+                        this.iflogin=true;
+                        sessionStorage.setItem("islogin",this.iflogin);
+                        sessionStorage.setItem("username",this.username);
                         this.$router.push("/");
                     }else{
                         Toast("用户名或者密码错误");
@@ -106,14 +141,7 @@ export default {
                 Toast("请同意协议");
             }
         },
-    //           main_log(val) {
-    //     console.log('main_log', val);
-    //   },
-    //   sub_log(val) {
-    //     console.log('sub_log', val);
-    //     this.$refs.target_1.collapse();
-    //   }
-        // ,
+
         toggle(){
             if(this.account==false){
                 this.account=true;
@@ -124,32 +152,68 @@ export default {
                 this.ifAgree=false;
                 this.checkImg="http://127.0.0.1:3000/checkBtn.png";
             }
+        },
+        //设置cookie
+        setCookies(name,value,expiredays){
+            document.cookie=name+"="+value+";max-age="+expiredays;
+            console.log(document.cookie);
+        },
+        //获得cookie
+        getCookies(){
+            var arr1=document.cookie.split(";");
+            var obj={};
+            for(var i=0;i<arr1.length;i++){
+                var arr2=arr1[i].trim().split("=");
+                obj[arr2[0]]=arr2[1];
+            }
+            return obj;
+        },
+        loginOut(){
+            this.axios.get("http://127.0.0.1:3000/user/loginOut").then((result)=>{
+                this.iflogin=false;
+                sessionStorage.setItem("islogin",this.iflogin);
+                this.$router.go(0);
+            })
+        },
+        rememberPwd(){
+            if(this.isrememberPwd==false){
+                this.isrememberPwd=true;
+                this.checkImgPwd="http://127.0.0.1:3000/checkBtn_active.png";
+            }else{
+                this.isrememberPwd=false;
+                this.checkImgPwd="http://127.0.0.1:3000/checkBtn.png";
+            }
         }
-    },
-    created(){
+
     },
     components:{
         Header
     },
-    watch:{
-        // username(){
-        //     var regexp=/^\w{3,8}$/;
-        //     if(!regexp.test(this.username)){
-        //         // console.log(11);
-        //         Toast("error");
-        //     }else{
-        //         this.status1="success"
-        //     }
-        // },
-        // password(){
-        //     var regexp=/^\d{3,8}$/;
-        //     if(!regexp.test(this.password)){
-        //         // console.log(11);
-        //         Toast("error");
-        //     }else{
-        //         this.status2="success"
-        //     }
-        // }
+    created(){
+        if(sessionStorage.getItem("islogin")=='false'){
+            this.iflogin=false;
+        }else{
+            this.iflogin=true;
+        }
+        this.username=sessionStorage.getItem("uname");
+        this.upwd=sessionStorage.getItem("upwd");
+        if(!this.iflogin){
+            var obj=this.getCookies();
+            if(obj.uname!=undefined){
+                this.username=obj.uname;
+            }
+            if(obj.upwd!=undefined){
+                this.password=obj.upwd;
+            }
+            if(obj.isrememberPwd!=undefined){
+                this.isrememberPwd=obj.isrememberPwd;
+                if(this.isrememberPwd){
+                    this.checkImgPwd="http://127.0.0.1:3000/checkBtn_active.png";
+                }else{
+                    this.checkImgPwd="http://127.0.0.1:3000/checkBtn.png";
+                }
+            }
+        }
 
     }
 
@@ -157,6 +221,26 @@ export default {
 }
 </script>
 <style scoped>
+#remember{
+    border: none;
+}
+#remember img{
+    width: 5%;
+    margin: 0 auto;
+    vertical-align: middle;
+}
+#remember label{
+    font-size: 0.8rem;
+}
+.loginOut{
+    text-align: center;
+    display: block;
+    margin: 0 auto;
+    border: solid 1px #4cb3b2;
+    color: #4cb3b2;
+    margin-top: 1rem;
+    box-shadow: 0.1rem 0.1rem 1rem #aaa;
+}
 .otherLink{
     width:80%;
     margin: 0 auto;
